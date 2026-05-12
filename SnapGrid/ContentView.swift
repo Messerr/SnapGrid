@@ -25,7 +25,3 @@ struct ContentView: View {
         .environment(userStore)
     }
 }
-
-#Preview {
-    ContentView()
-}

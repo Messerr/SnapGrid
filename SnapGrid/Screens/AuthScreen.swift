@@ -18,7 +18,3 @@ struct AuthScreen: View {
         }
     }
 }
-
-#Preview {
-    AuthScreen()
-}

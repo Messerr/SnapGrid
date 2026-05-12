@@ -93,7 +93,3 @@ struct ProfileScreen: View {
         posts = (try? await PostService.fetchUserPosts(userId: uid)) ?? []
     }
 }
-
-#Preview {
-    ProfileScreen()
-}

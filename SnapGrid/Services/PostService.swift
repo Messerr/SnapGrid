@@ -60,4 +60,26 @@ enum PostService {
             )
         }
     }
+    
+    static func fetchFeedPosts() async throws -> [Post] {
+        let db = Firestore.firestore()
+        let snapshot = try await db.collection("posts")
+            .order(by: "datePosted", descending: true)
+            .limit(to: 50)
+            .getDocuments()
+        return snapshot.documents.compactMap { doc in
+            let d = doc.data()
+            return Post(
+                id: d["id"] as? String ?? doc.documentID,
+                userId: d["userId"] as? String ?? "",
+                username: d["username"] as? String ?? "",
+                userProfileImageUrl: d["userProfileImageUrl"] as? String,
+                imageUrl: d["imageUrl"] as? String ?? "",
+                caption: d["caption"] as? String ?? "",
+                likeCount: d["likeCount"] as? Int ?? 0,
+                commentCount: d["commentCount"] as? Int ?? 0,
+                datePosted: (d["datePosted"] as? Timestamp)?.dateValue() ?? Date()
+            )
+        }
+    }
 }

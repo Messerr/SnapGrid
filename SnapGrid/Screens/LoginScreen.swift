@@ -65,11 +65,3 @@ struct LoginScreen: View {
         }
     }
 }
-
-#Preview {
-    @Previewable @State var showSignUp = true
-    
-    LoginScreen(
-        showSignUp: $showSignUp
-    )
-}

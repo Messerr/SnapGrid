@@ -13,8 +13,7 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                Text("Feed coming soon")
-                    .navigationTitle("Home")
+                FeedScreen()
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button {
@@ -37,8 +36,4 @@ struct MainTabView: View {
             CreatePostScreen()
         }
     }
-}
-
-#Preview {
-    MainTabView()
 }

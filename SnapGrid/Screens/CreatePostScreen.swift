@@ -115,7 +115,3 @@ struct CreatePostScreen: View {
         isPosting = false
     }
 }
-
-#Preview {
-    CreatePostScreen()
-}
