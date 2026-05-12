@@ -62,4 +62,29 @@ enum UserService {
         
         try await db.collection("users").document(uid).updateData(updates)
     }
+    
+    static func searchUsers(query: String) async throws -> [AppUser] {
+        guard !query.isEmpty else { return [] }
+        let db = Firestore.firestore()
+        let lowered = query.lowercased()
+        let snapshot = try await db.collection("users")
+            .whereField("username", isGreaterThanOrEqualTo: lowered)
+            .whereField("username", isLessThan: lowered + "\u{f8ff}")
+            .limit(to: 20)
+            .getDocuments()
+        return snapshot.documents.compactMap { doc in
+            let d = doc.data()
+            return AppUser(
+                id: d["id"] as? String ?? doc.documentID,
+                username: d["username"] as? String ?? "",
+                email: d["email"] as? String ?? "",
+                bio: d["bio"] as? String ?? "",
+                profileImageUrl: d["profileImageUrl"] as? String,
+                dateJoined: (d["dateJoined"] as? Timestamp)?.dateValue() ?? Date(),
+                followerCount: d["followerCount"] as? Int ?? 0,
+                followingCount: d["followingCount"] as? Int ?? 0,
+                postCount: d["postCount"] as? Int ?? 0
+            )
+        }
+    }
 }

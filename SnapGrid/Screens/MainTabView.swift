@@ -31,6 +31,12 @@ struct MainTabView: View {
                 ProfileScreen()
             }
             .tabItem { Label("Profile", systemImage: "person") }
+            NavigationStack {
+                SearchUsersScreen()
+            }
+            .tabItem {
+                Label("Search", systemImage: "magnifyingglass")
+            }
         }
         .sheet(isPresented: $showCreatePost) {
             CreatePostScreen()
