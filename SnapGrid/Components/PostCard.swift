@@ -9,6 +9,13 @@ import SwiftUI
 
 struct PostCard: View {
     let post: Post
+    let currentUserId: String?
+    @State private var isLiked = false
+    @State private var likeCount: Int = 0
+    @State private var heartScale: CGFloat = 1.0
+    @State private var showComments = false
+    @State private var commentCount: Int = 0
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -47,11 +54,15 @@ struct PostCard: View {
                 }
             }
             HStack(spacing: 16) {
-                Button { } label: {
-                    Image(systemName: "heart")
+                Button {
+                    Task { await toggleLike() }
+                } label: {
+                    Image(systemName: isLiked ? "heart.fill" : "heart")
                         .font(.title3)
+                        .foregroundStyle(isLiked ? .red : .primary)
+                        .scaleEffect(heartScale)
                 }
-                Button { } label: {
+                Button { showComments = true } label: {
                     Image(systemName: "bubble.right")
                         .font(.title3)
                 }
@@ -60,10 +71,22 @@ struct PostCard: View {
             .foregroundStyle(.primary)
             .padding(.horizontal)
             
-            if post.likeCount > 0 {
-                Text("\(post.likeCount) likes")
+            if likeCount > 0 {
+                Text("\(likeCount) likes")
                     .font(.subheadline.bold())
                     .padding(.horizontal)
+            }
+            
+            if commentCount > 0 {
+                Button {
+                    showComments = true
+                } label: {
+                    Text("View all \(commentCount) comments")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal)
             }
             
             if !post.caption.isEmpty {
@@ -82,6 +105,50 @@ struct PostCard: View {
                 .padding(.horizontal)
         }
         .padding(.vertical, 8)
+        .sheet(isPresented: $showComments) {
+            CommentsScreen(postId: post.id)
+        }
+        .onAppear {
+            likeCount = post.likeCount
+            commentCount = post.commentCount
+        }
+        .task {
+            guard let uid = currentUserId else { return }
+            isLiked = await LikeService.hasLiked(
+                postId: post.id, userId: uid
+            )
+        }
+    }
+    
+    func toggleLike() async {
+        guard let uid = currentUserId else { return }
+        do {
+            if isLiked {
+                try await LikeService.unlikePost(
+                    postId: post.id,
+                    userId: uid
+                )
+                isLiked = false
+                likeCount -= 1
+            } else {
+                try await LikeService.likePost(
+                    postId: post.id,
+                    userId: uid
+                )
+                isLiked = true
+                likeCount += 1
+                withAnimation(.spring(duration: 0.3, bounce: 0.4)) {
+                    heartScale = 1.3
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    withAnimation(.spring(duration: 0.2)) {
+                        heartScale = 1.0
+                    }
+                }
+            }
+        } catch {
+            print("Like error: \(error)")
+        }
     }
 }
 
@@ -96,5 +163,7 @@ struct PostCard: View {
         likeCount: 42,
         commentCount: 5,
         datePosted: .now.addingTimeInterval(-3600)
-    ))
+    ),
+        currentUserId: "xyz"
+    )
 }

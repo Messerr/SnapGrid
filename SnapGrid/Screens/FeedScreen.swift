@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FeedScreen: View {
+    @Environment(UserStore.self) var userStore
     @State private var posts: [Post] = []
     @State private var isLoading = true
     
@@ -26,7 +27,7 @@ struct FeedScreen: View {
             } else {
                 LazyVStack(spacing: 0) {
                     ForEach(posts) { post in
-                        PostCard(post: post)
+                        PostCard(post: post, currentUserId: userStore.currentUser?.id)
                         Divider()
                     }
                 }

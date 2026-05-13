@@ -18,7 +18,6 @@ struct UserProfileScreen: View {
         ScrollView {
             if let user {
                 VStack(spacing: 0) {
-                    // Avatar
                     if let url = user.profileImageUrl, let imageUrl = URL(string: url) {
                         AsyncImage(url: imageUrl) { img in
                             img.resizable().aspectRatio(contentMode: .fill)
