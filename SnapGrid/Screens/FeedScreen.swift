@@ -44,7 +44,13 @@ struct FeedScreen: View {
     
     func loadFeed() async {
         do {
-            posts = try await PostService.fetchFeedPosts()
+            if let uid = userStore.currentUser?.id {
+                posts = try await PostService.fetchFollowedFeedPosts(userId: uid)
+            }
+            
+            if posts.isEmpty {
+                posts = try await PostService.fetchFeedPosts()
+            }
         } catch {
             print("Feed error: \(error)")
         }

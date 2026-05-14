@@ -14,6 +14,9 @@ struct UserProfileScreen: View {
     @State private var posts: [Post] = []
     @State private var isFollowing = false
     @State private var isLoading = true
+    @State private var conversationId: String?
+    @State private var showChat = false
+    
     var body: some View {
         ScrollView {
             if let user {
@@ -61,6 +64,31 @@ struct UserProfileScreen: View {
                         .buttonStyle(.bordered)
                         .padding(.top, 12)
                     }
+                    Button {
+                        Task {
+                            guard let currentUid = userStore.currentUser?.id else { return }
+                            conversationId = try? await ChatService.findOrCreateConversation(
+                                currentUid: currentUid,
+                                otherUid: userId
+                            )
+                            showChat = true
+                        }
+                    } label: {
+                        Text("Message")
+                            .font(.subheadline.bold())
+                            .frame(width: 140)
+                    }
+                    .buttonStyle(.bordered)
+                    .padding(.top, 6)
+                    .navigationDestination(isPresented: $showChat) {
+                        if let convId = conversationId {
+                           ChatScreen(
+                            conversationId: convId,
+                            currentUserId: userStore.currentUser?.id ?? ""
+                           )
+                        }
+                    }
+                    
                     HStack(spacing: 32) {
                         StatColumn(value: user.postCount, label: "Posts")
                         StatColumn(value: user.followerCount, label: "Followers")

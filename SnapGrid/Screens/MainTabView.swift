@@ -31,6 +31,14 @@ struct MainTabView: View {
                 ProfileScreen()
             }
             .tabItem { Label("Profile", systemImage: "person") }
+            
+            NavigationStack {
+                ConversationsListScreen()
+            }
+            .tabItem {
+                Label("Messages", systemImage: "bubble.left.and.bubble.right")
+            }
+            
             NavigationStack {
                 SearchUsersScreen()
             }

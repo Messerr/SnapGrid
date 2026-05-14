@@ -19,6 +19,7 @@ struct ContentView: View {
                     .task { await userStore.loadCurrentUser() }
             } else {
                 AuthScreen()
+                    .onAppear { userStore.currentUser = nil }
             }
         }
         .environment(authManager)
