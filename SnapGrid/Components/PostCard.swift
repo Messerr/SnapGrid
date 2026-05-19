@@ -18,19 +18,22 @@ struct PostCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                AsyncImage(url: URL(string: post.userProfileImageUrl ?? "")) { img in
-                    img.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle().fill(.gray.opacity(0.3))
+            NavigationLink(destination: UserProfileScreen(userId: post.userId)) {
+                HStack {
+                    AsyncImage(url: URL(string: post.userProfileImageUrl ?? "")) { img in
+                        img.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Circle().fill(.gray.opacity(0.3))
+                    }
+                    .frame(width: 32, height: 32)
+                    .clipShape(Circle())
+                    Text(post.username)
+                        .font(.subheadline.bold())
+                    Spacer()
                 }
-                .frame(width: 32, height: 32)
-                .clipShape(Circle())
-                Text(post.username)
-                    .font(.subheadline.bold())
-                Spacer()
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
+            .buttonStyle(.plain)
             AsyncImage(url: URL(string: post.imageUrl)) { phase in
                 switch phase {
                 case .success(let image):

@@ -85,7 +85,7 @@ enum PostService {
     
     static func fetchFollowedUserIds(uid: String) async throws -> [String] {
         let db = Firestore.firestore()
-        let snapshot = try await db.collection("useres").document(uid)
+        let snapshot = try await db.collection("users").document(uid)
             .collection("following").getDocuments()
         return snapshot.documents.map { $0.documentID }
     }
@@ -99,7 +99,7 @@ enum PostService {
         }
         let limitedIds = Array(followedIds.prefix(30))
         let snapshot = try await db.collection("posts")
-            .whereField("userid", in: limitedIds)
+            .whereField("userId", in: limitedIds)
             .order(by: "datePosted", descending: true)
             .limit(to: 50)
             .getDocuments()

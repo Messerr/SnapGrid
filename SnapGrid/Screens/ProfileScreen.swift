@@ -12,6 +12,8 @@ struct ProfileScreen: View {
     @Environment(AuthManager.self) var authManager
     @State private var showEditProfile = false
     @State private var posts: [Post] = []
+    @State private var followerIds: [String] = []
+    @State private var followingIds: [String] = []
     
     var body: some View {
         if let user = userStore.currentUser {
@@ -54,8 +56,15 @@ struct ProfileScreen: View {
                     
                     HStack(spacing: 32) {
                         StatColumn(value: user.postCount, label: "Posts")
-                        StatColumn(value: user.followerCount, label: "Followers")
-                        StatColumn(value: user.followingCount, label: "Following")
+                        NavigationLink(destination: UserListScreen(title: "Followers", userIds: followerIds)) {
+                            StatColumn(value: user.followerCount, label: "Followers")
+                        }
+                        .buttonStyle(.plain)
+                        
+                        NavigationLink(destination: UserListScreen(title: "Following", userIds: followingIds)) {
+                            StatColumn(value: user.followingCount, label: "Following")
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(.vertical, 16)
                     
@@ -67,6 +76,8 @@ struct ProfileScreen: View {
             }
             .task {
                 await loadPosts()
+                followerIds = (try? await FollowService.getFollowerIds(uid: user.id)) ?? []
+                followingIds = (try? await FollowService.getFollowingIds(uid: user.id)) ?? []
             }
             .refreshable {
                 await loadPosts()

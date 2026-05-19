@@ -10,9 +10,13 @@ import SwiftUI
 struct ChatScreen: View {
     let conversationId: String
     let currentUserId: String
+    let otherUserName: String?
+    let otherProfileImageUrl: String?
+    let otherUserId: String
     @State private var vm = ChatViewModel()
     @State private var newMessage = ""
     @State private var isSending = false
+    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
         VStack(spacing: 0) {
@@ -20,16 +24,46 @@ struct ChatScreen: View {
                 ScrollView {
                     LazyVStack(spacing: 8) {
                         ForEach(vm.messages) { msg in
-                            MessageBubble(
-                                text: msg.text,
-                                isFromMe: msg.senderId == currentUserId,
-                                timestamp: msg.timestamp
-                            )
+                            HStack {
+                                if msg.senderId == currentUserId { Spacer() }
+                                
+                                MessageBubble(
+                                    text: msg.text,
+                                    isFromMe: msg.senderId == currentUserId
+                                )
+                                
+                                if msg.senderId != currentUserId { Spacer() }
+                            }
+                            .overlay(alignment: .trailing) {
+                                if dragOffset < -10 {
+                                    Text(msg.timestamp, format: .dateTime.hour().minute())
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                        .offset(x: 55)
+                                        .transition(.opacity)
+                                }
+                            }
+                            .offset(x: dragOffset)
                             .id(msg.id)
                         }
                     }
                     .padding()
                 }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 8)
+                        .onChanged { value in
+                            if value.translation.width < 0 {
+                                withAnimation(.interactiveSpring) {
+                                    dragOffset = max(value.translation.width, -60)
+                                }
+                            }
+                        }
+                        .onEnded { _ in
+                            withAnimation(.spring(duration: 0.3)) {
+                                dragOffset = 0
+                            }
+                        }
+                )
                 .onChange(of: vm.messages.count) {
                     if let last = vm.messages.last {
                         withAnimation {
@@ -54,6 +88,24 @@ struct ChatScreen: View {
         }
         .onAppear { vm.startListening(conversationId: conversationId) }
         .onDisappear { vm.stopListening() }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                NavigationLink(destination: UserProfileScreen(userId: otherUserId)) {
+                    HStack {
+                        AsyncImage(url: URL(string: otherProfileImageUrl ?? "")) { img in
+                            img.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Circle().fill(.gray.opacity(0.3))
+                        }
+                        .frame(width: 28, height: 28)
+                        .clipShape(Circle())
+                        Text(otherUserName ?? "Chat")
+                            .font(.subheadline.bold())
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
     
     func sendMessage() async {
@@ -76,6 +128,9 @@ struct ChatScreen: View {
 #Preview {
     ChatScreen(
         conversationId: "xyz",
-        currentUserId: "abc"
+        currentUserId: "abc",
+        otherUserName: "zzzzz",
+        otherProfileImageUrl: "",
+        otherUserId: "uuuuu"
     )
 }

@@ -10,7 +10,6 @@ import SwiftUI
 struct MessageBubble: View {
     let text: String
     let isFromMe: Bool
-    let timestamp: Date
     
     var body: some View {
         HStack {
@@ -24,7 +23,6 @@ struct MessageBubble: View {
                         in: RoundedRectangle(cornerRadius: 16)
                     )
                     .foregroundStyle(isFromMe ? .white : .primary)
-                Text(timestamp, format: .dateTime.hour().minute())
             }
             if !isFromMe { Spacer() }
         }
@@ -34,7 +32,6 @@ struct MessageBubble: View {
 #Preview {
     MessageBubble(
         text: "Hello",
-        isFromMe: true,
-        timestamp: .now
+        isFromMe: true
     )
 }

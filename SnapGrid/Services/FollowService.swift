@@ -51,4 +51,18 @@ enum FollowService {
             .collection("following").document(targetUid).getDocument()
         return doc?.exists ?? false
     }
+    
+    static func getFollowerIds(uid: String) async throws -> [String] {
+        let db = Firestore.firestore()
+        let snapshot = try await db.collection("users").document(uid)
+            .collection("followers").getDocuments()
+        return snapshot.documents.map { $0.documentID }
+    }
+    
+    static func getFollowingIds(uid: String) async throws -> [String] {
+        let db = Firestore.firestore()
+        let snapshot = try await db.collection("users").document(uid)
+            .collection("following").getDocuments()
+        return snapshot.documents.map { $0.documentID }
+    }
 }

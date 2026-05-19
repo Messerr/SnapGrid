@@ -11,6 +11,7 @@ struct ConversationsListScreen: View {
     @Environment(UserStore.self) var userStore
     @State private var conversations: [Conversation] = []
     @State private var isLoading = true
+    @State private var otherUsers: [String: AppUser] = [:]
     
     var body: some View {
         Group {
@@ -26,15 +27,28 @@ struct ConversationsListScreen: View {
                 List(conversations) { convo in
                     NavigationLink(destination: ChatScreen(
                         conversationId: convo.id,
-                        currentUserId: userStore.currentUser?.id ?? ""
+                        currentUserId: userStore.currentUser?.id ?? "",
+                        otherUserName: convo.otherUsername,
+                        otherProfileImageUrl: otherUsers[convo.id]?.profileImageUrl,
+                        otherUserId: otherUsers[convo.id]?.id ?? ""
                     )) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(convo.otherUsername ?? "Unknown")
-                                .font(.subheadline.bold())
-                            Text(convo.lastMessage)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
+                        HStack(spacing: 12) {
+                            AsyncImage(url: URL(string: otherUsers[convo.id]?.profileImageUrl ?? "")) { img in
+                                img.resizable().aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Circle().fill(.gray.opacity(0.3))
+                            }
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(convo.otherUsername ?? "Unknown")
+                                    .font(.subheadline.bold())
+                                Text(convo.lastMessage)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
                         }
                     }
                 }
@@ -57,6 +71,7 @@ struct ConversationsListScreen: View {
                 let otherUid = convos[i].participants.first { $0 != uid } ?? ""
                 if let otherUser = try? await UserService.fetchUser(uid: otherUid) {
                     convos[i].otherUsername = otherUser.username
+                    otherUsers[convos[i].id] = otherUser
                 }
             }
             conversations = convos

@@ -16,6 +16,8 @@ struct UserProfileScreen: View {
     @State private var isLoading = true
     @State private var conversationId: String?
     @State private var showChat = false
+    @State private var followerIds: [String] = []
+    @State private var followingIds: [String] = []
     
     var body: some View {
         ScrollView {
@@ -84,15 +86,25 @@ struct UserProfileScreen: View {
                         if let convId = conversationId {
                            ChatScreen(
                             conversationId: convId,
-                            currentUserId: userStore.currentUser?.id ?? ""
+                            currentUserId: userStore.currentUser?.id ?? "",
+                            otherUserName: user.username,
+                            otherProfileImageUrl: user.profileImageUrl,
+                            otherUserId: userId
                            )
                         }
                     }
                     
                     HStack(spacing: 32) {
                         StatColumn(value: user.postCount, label: "Posts")
-                        StatColumn(value: user.followerCount, label: "Followers")
-                        StatColumn(value: user.followingCount, label: "Following")
+                        NavigationLink(destination: UserListScreen(title: "Followers", userIds: followerIds)) {
+                            StatColumn(value: user.followerCount, label: "Followers")
+                        }
+                        .buttonStyle(.plain)
+
+                        NavigationLink(destination: UserListScreen(title: "Following", userIds: followingIds)) {
+                            StatColumn(value: user.followingCount, label: "Following")
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(.vertical, 16)
                     Divider()
@@ -119,6 +131,8 @@ struct UserProfileScreen: View {
                     currentUid: currentUid, targetUid: userId
                 )
             }
+            followerIds = (try? await FollowService.getFollowerIds(uid: userId)) ?? []
+            followingIds = (try? await FollowService.getFollowingIds(uid: userId)) ?? []
         } catch {
             print("Error loading profile: \(error)")
         }
