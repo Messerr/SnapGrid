@@ -21,6 +21,7 @@ enum CommentService {
                 id: doc.documentID,
                 userId: d["userId"] as? String ?? "",
                 username: d["username"] as? String ?? "",
+                userProfileImage: d["profileImageUrl"] as? String,
                 text: d["text"] as? String ?? "",
                 timestamp: (d["timestamp"] as? Timestamp)?.dateValue() ?? Date()
             )
@@ -29,12 +30,13 @@ enum CommentService {
     
     static func addComment(
         postId: String, userId: String,
-        username: String, text: String
+        username: String, profileImageUrl: String?, text: String
     ) async throws {
         let db = Firestore.firestore()
         let commentData: [String: Any] = [
             "userId": userId,
             "username": username,
+            "profileImageUrl": profileImageUrl as Any,
             "text": text,
             "timestamp": Timestamp()
         ]

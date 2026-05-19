@@ -11,6 +11,7 @@ struct Comment: Identifiable {
     let id: String
     let userId: String
     let username: String
+    let userProfileImage: String?
     let text: String
     let timestamp: Date
 }

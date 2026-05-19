@@ -18,17 +18,27 @@ struct CommentsScreen: View {
         NavigationStack {
             VStack {
                 List(comments) { comment in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(comment.username)
-                                .font(.subheadline.bold())
-                            Spacer()
-                            Text(comment.timestamp, format: .relative(presentation: .named))
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
+                    HStack(alignment: .top, spacing: 10) {
+                        AsyncImage(url: URL(string: comment.userProfileImage ?? "")) { img in
+                            img.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Circle().fill(.gray.opacity(0.3))
                         }
-                        Text(comment.text)
-                            .font(.subheadline)
+                        .frame(width: 32, height: 32)
+                        .clipShape(Circle())
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(comment.username)
+                                    .font(.subheadline.bold())
+                                Spacer()
+                                Text(comment.timestamp, format: .relative(presentation: .named))
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            Text(comment.text)
+                                .font(.subheadline)
+                        }
                     }
                 }
                 .listStyle(.plain)
@@ -67,6 +77,7 @@ struct CommentsScreen: View {
                 postId: postId,
                 userId: user.id,
                 username: user.username,
+                profileImageUrl: user.profileImageUrl,
                 text: newComment
             )
             newComment = ""
